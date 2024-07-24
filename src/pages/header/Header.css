@@ -1,0 +1,58 @@
+.carousel slide {
+  background: linear-gradient(
+    134.56deg,
+    rgba(245, 245, 245, 0.5) -23.457%,
+    rgba(245, 245, 245, 0.5) 107.508%
+  );
+}
+.header-text {
+  color: rgb(61, 61, 61);
+  font-family: Cera Pro;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 10%;
+  text-align: left;
+  text-transform: uppercase;
+}
+.header-title {
+  font-family: Cera Pro;
+  font-size: 70px;
+  font-weight: 900;
+  line-height: 70px;
+  letter-spacing: 0%;
+  text-align: left;
+  text-transform: uppercase;
+}
+.span {
+  color: rgb(70, 163, 88);
+}
+.header-title2 {
+  color: rgb(114, 114, 114);
+  font-family: Cera Pro;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0%;
+  text-align: left;
+}
+.header-btn {
+  /* Rectangle 4 */
+  position: absolute;
+  width: 140px;
+  height: 40px;
+  border-radius: 6px;
+  background: rgb(70, 163, 88);
+  color: rgb(255, 255, 255);
+  font-family: Cera Pro;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: 0%;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  margin-top: 44px;
+}
