@@ -1,40 +1,58 @@
-import React, { useContext, useEffect, useState } from 'react';
-import './Card.css';
+import { Form, Input, Rate, Select } from 'antd'
+import React, { useContext, useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import { Modal, ModalBody, ModalHeader } from 'reactstrap'
+import { Context } from '../../App'
 import pencil from '../../img/pencil.svg'
 import trash from '../../img/trash-fill.svg'
-import { Context } from '../../App';
-import { Modal, ModalBody, ModalHeader } from 'reactstrap';
-import { Form, Input, Select } from 'antd';
-import { toast } from 'react-toastify';
+import './Card.css'
 
 
 export default function Card() {
-    const { loader, allProduct, categorieList, activeBtn, setActiveBtn, setDeleteCardID, modal, setModal } = useContext(Context)
-    const [form] = Form.useForm();
-    const [cardInfo, setCardInfo] = useState({})
+    const { loader, allProduct, categorieList, activeBtn, setActiveBtn, modal, setModal } = useContext(Context)
+    const [cardInfo, setCardInfo] = useState(null)
     const [options, setOptions] = useState([])
+    const [modal2, setModal2] = useState(false)
 
     useEffect(() => {
         var newData = []
         categorieList.map((item) => newData.push({ label: item, value: item }))
         setOptions(newData)
-    }, [])
+    }, [categorieList])
 
     const addNewProduct = (values) => {
-        fetch('https://fakestoreapi.com/products', {
-            method: "POST",
+
+        fetch(cardInfo === null ? 'https://fakestoreapi.com/products' : `https://fakestoreapi.com/products/${cardInfo?.id}`, {
+            method: cardInfo === null ? "POST" : "PUT",
             body: JSON.stringify(values)
         })
             .then(res => res.json())
             .then(json => {
-                form.resetFields()
-                toast.success('Muvaffaqiyatli yaratildi')
+                closeModal()
+                toast.success(cardInfo === null ? 'Muvaffaqiyatli yaratildi' : "Muvaffaqiyatli o'zgartirildi")
             })
+    }
+
+    const deleteProduct = (deleteCardID) => {
+        fetch(`https://fakestoreapi.com/products/${deleteCardID}`, {
+            method: "DELETE",
+        })
+            .then((res) => res.json())
+            .then((json) => toast.error("Product deleted."))
     }
 
     const changeCardInfo = (item) => {
         setCardInfo(item)
         setModal(true)
+    }
+    const cardInfoFunc = (item) => {
+        setCardInfo(item)
+        setModal2(true)
+    }
+
+    const closeModal = () => {
+        setModal(false)
+        setCardInfo(null)
     }
     return (
         <div>
@@ -64,14 +82,13 @@ export default function Card() {
                                             </svg>
                                             <div className="dropdown-box-card">
                                                 <img src={pencil} alt="" srcSet="" onClick={() => { changeCardInfo(item) }} />
-                                                <img src={trash} alt="" srcSet="" onClick={() => setDeleteCardID(item.id)} />
+                                                <img src={trash} alt="" srcSet="" onClick={() => deleteProduct(item.id)} />
                                             </div>
-
                                         </div>
                                     </div>
                                     <div className="p-3 bg-white">
                                         <h4 className='category'>{item?.category}</h4>
-                                        <h4 className='flower-name'>{item.title}</h4>
+                                        <h4 className='flower-name' onClick={() => cardInfoFunc(item)}>{item.title}</h4>
                                         <h1 className='title'>{item.description}</h1>
                                         <div className="d-flex align-items-center justify-content-between mt-4 bg-white" >
                                             <p className='price mb-0'>{item.price}$</p>
@@ -83,37 +100,64 @@ export default function Card() {
                         </div>
                 }
             </div>
-
-            <Modal isOpen={modal} toggle={() => { setModal(false) }}>
-                <ModalHeader toggle={() => setModal(false)}>Modal title</ModalHeader>
-                <ModalBody className='pb-0 '>
+            {/* Card info update modal */}
+            <Modal isOpen={modal}>
+                <ModalHeader toggle={closeModal}>
+                    {cardInfo === null ? 'Add new product' : 'Update product'}
+                </ModalHeader>
+                <ModalBody className='pb-0'>
                     <Form
-                        form={form}
-                        layout="vertical"
+                        id='form'
+                        layout='vertical'
                         onFinish={addNewProduct}
+                        initialValues={cardInfo}
+                        validateMessages={{ required: '${label} is required!' }}
                     >
-                        <Form.Item label="Category" name='category' initialValue={cardInfo.category}>
+                        <Form.Item label='Category' name='category' rules={[{ required: true }]}>
                             <Select options={options} />
                         </Form.Item>
-                        <Form.Item label="Title" name='title'>
-                            <Input placeholder="Enter title" />
+                        <Form.Item label='Title' name='title' rules={[{ required: true }]}>
+                            <Input placeholder='Enter title' />
                         </Form.Item>
-                        <Form.Item label="Description" name='description'>
-                            <Input placeholder="Enter description" />
+                        <Form.Item label='Description' name='description' rules={[{ required: true }]}>
+                            <Input placeholder='Enter description' />
                         </Form.Item>
-                        <Form.Item label="Price" name="price" >
-                            <Input placeholder="Enter price" />
+                        <Form.Item label='Price' name='price' rules={[{ required: true }]}>
+                            <Input placeholder='Enter price' />
                         </Form.Item>
-                        <Form.Item label="Img" name="image">
-                            <Input placeholder="Enter img url" />
+                        <Form.Item label='Img' name='image' rules={[{ required: true }]}>
+                            <Input placeholder='Enter img url' />
                         </Form.Item>
-                        <Form.Item >
-                            <button className="navbar-btn w-100" data-bs-dismiss="offcanvas" aria-label="Close">Add new product</button>
+                        <Form.Item>
+                            <button className='navbar-btn w-100' type='submit'>
+                                {cardInfo === null ? 'Add new product' : 'Update product'}
+                            </button>
                         </Form.Item>
                     </Form>
                 </ModalBody>
             </Modal>
 
+            {/* Card info modal */}
+            <Modal size='lg' isOpen={modal2} toggle={() => setModal2(false)}>
+                <ModalHeader toggle={() => setModal2(false)}>
+                    <p className='category2'>{cardInfo?.category}</p>
+                </ModalHeader>
+                <ModalBody>
+                    <div className="modal-card">
+                        <img className='img' style={{ width: '350px' }} src={cardInfo?.image} alt='' />
+                        <div className="modal-card-box">
+                            <Rate disabled defaultValue={cardInfo?.rating?.rate} />
+                            <p className='flower-name2 mt-2'>{cardInfo?.title}</p>
+                            <p className='title2'>{cardInfo?.description}</p>
+                            <div className="d-flex align-items-center justify-content-between">
+                                <p className='price mb-0'>{cardInfo?.price}$</p>
+                                <p className='price mb-0 me-3'>Total: {cardInfo?.rating?.count}</p>
+
+                            </div>
+                        </div>
+                    </div>
+                </ModalBody>
+            </Modal>
         </div >
     )
 }
